@@ -1,0 +1,5 @@
+/*.out
+/test/*.out
+/test/test-script.*
+/maps.txt
+/TAGS
