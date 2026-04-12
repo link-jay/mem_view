@@ -24,8 +24,21 @@ def parse_mem(addr: list[str, str]) -> bytes:
         buf = f.read(end - start)
     return buf
 
+FLAG = 0
+def parse_command():
+    global FLAG
+    for i in range(len(sys.argv) - 1):
+        if sys.argv[i] == "-s":
+            FLAG = 0
+        elif sys.argv[i] == "-h":
+            FLAG = 1
+        elif sys.argv[i] in ("--help"):
+            print("help")
+            exit(0)
+
 heap_addr, stack_addr = parse_maps()
-parse_target = stack_addr        # <-
+parse_command()
+parse_target = heap_addr if FLAG else stack_addr        # <-
 cols, rows = os.get_terminal_size()
 print("\033[?25l\033[H\033[2J", end="")
 print("demo flush in 0.5s\n")

@@ -4,6 +4,7 @@
 #include <sys/ioctl.h>
 #include <signal.h>
 #include "readmem.c"
+#include "parse_command.c"
 
 volatile sig_atomic_t stop = 0;
 
@@ -37,6 +38,8 @@ void sigint_handler(int sig)
 
 int main(int args, char* argv[])
 {
+  char* FLAG = malloc(8);
+  strcpy(FLAG, "stack");
   signal(SIGINT, sigint_handler);
   struct winsize* ws = get_tsz();
 
@@ -59,16 +62,20 @@ int main(int args, char* argv[])
     return 1;
   }
   
+  parse_command(args, argv, FLAG);
   char *old_buf, *new_buf;
-  old_buf = parse_mem(mem, mem_info, "stack");
-  long int buf_size  = mem_info->stack_end - mem_info->stack_start;
+  old_buf = parse_mem(mem, mem_info, FLAG);
+  long int buf_size  = strcmp(FLAG, "stack") == 0 ?
+    mem_info->stack_end - mem_info->stack_start : mem_info->heap_end - mem_info->heap_start;
   long int row_range = buf_size / (ws->ws_row - 2);
   long int uni_range = row_range / ws->ws_col;
   long int curr_range= uni_range;
   draw_view(ws->ws_row, ws->ws_col);
   while (! stop) {
-    new_buf = parse_mem(mem, mem_info, "stack");
-    buf_size = mem_info->stack_end - mem_info->stack_start;
+    new_buf = strcmp(FLAG, "stack") == 0 ?
+      parse_mem(mem, mem_info, "stack") : parse_mem(mem, mem_info, "heap");
+    buf_size  = strcmp(FLAG, "stack") == 0 ?
+      mem_info->stack_end - mem_info->stack_start : mem_info->heap_end - mem_info->heap_start;
     for (int i = 0; i < buf_size; i += uni_range) {
       curr_range = i + uni_range > buf_size ? buf_size - i : uni_range;
       if (memcmp(old_buf + i, new_buf + i, curr_range) != 0) {
@@ -83,6 +90,7 @@ int main(int args, char* argv[])
     usleep(500000);
   }
   free(new_buf);
+  free(mem_info);
   free(ws);
   fclose(mem);
   printf("\033[H\033[J\033[?25h");

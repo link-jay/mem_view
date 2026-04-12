@@ -4,7 +4,8 @@ It's built on the Linux virtual memory system, relying on parsing /proc/[pid]/ma
 
 ## Features
 * [x] View heap/stack
-* [ ] Switch heap/stack view via command line
+* [ ] Refresh when size change
+* [x] Switch heap/stack view via command line
 * [ ] Switch heap/stack view using hotkeys
 
 ## Arch

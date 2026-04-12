@@ -1,3 +1,4 @@
 digraph G {
 	"draw view" -> "parse memory" -> "draw changes"
+	"parse command" -> "draw changes"
 }
