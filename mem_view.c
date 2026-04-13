@@ -31,19 +31,6 @@ void free_buf(struct mem_buf* buf)
   free(buf);
 }
   
-void draw_view(size_t rows, size_t cols)
-{
-  printf("\033[?25l\033[H\033[2J");
-  printf("mem_view flush in 0.5s\n");
-  for (size_t r = 0; r < rows - 2; r++) {
-    for (size_t c = 0; c < cols; c++) {
-      putchar('|');
-    }
-    putchar('\n');
-  }
-  fflush(stdout);
-}
-
 void sigint_handler(int sig)
 {
   stop = 1;
@@ -82,7 +69,8 @@ int main(int args, char* argv[])
   long int row_range = buf_size / (ws->ws_row - 2);
   long int uni_range = row_range / ws->ws_col;
   long int curr_range= uni_range;
-  draw_view(ws->ws_row, ws->ws_col); /* TODO: 是否保留？ */
+  printf("\033[H\033[J\033[?25l");
+  printf("mem_view refresh in 0.5s.\n");
   while (! stop) {
     mb->new_buf = strcmp(FLAG, "stack") == 0 ?
       parse_mem(mem, mb->mem_info, "stack") : parse_mem(mem, mb->mem_info, "heap");
