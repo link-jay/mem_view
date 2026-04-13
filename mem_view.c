@@ -18,6 +18,18 @@ struct winsize* get_tsz()
   return ws;
 }
 
+void prepare_terminal()
+{
+  printf("\033[H\033[J\033[?25l");
+  printf("mem_view refresh in 0.5s.\n");
+}
+
+void restore_terminal()
+{
+  printf("\033[H\033[J\033[?25h");
+  fflush(stdout);
+}
+
 struct mem_buf {
   struct heap_stack* mem_info;
   char* old_buf;
@@ -63,17 +75,16 @@ int main(int args, char* argv[])
     return 1;
   }
   
+  /* TODO: 精简解析逻辑 */
+  prepare_terminal();
   parse_command(args, argv, FLAG);
   mb->old_buf = parse_mem(mem, mb->mem_info, FLAG);
   long int buf_size  = strcmp(FLAG, "stack") == 0 ? mb->mem_info->stack_size : mb->mem_info->heap_size;
   long int row_range = buf_size / (ws->ws_row - 2);
   long int uni_range = row_range / ws->ws_col;
   long int curr_range= uni_range;
-  printf("\033[H\033[J\033[?25l");
-  printf("mem_view refresh in 0.5s.\n");
   while (! stop) {
-    mb->new_buf = strcmp(FLAG, "stack") == 0 ?
-      parse_mem(mem, mb->mem_info, "stack") : parse_mem(mem, mb->mem_info, "heap");
+    mb->new_buf = parse_mem(mem, mb->mem_info, FLAG);
     buf_size  = strcmp(FLAG, "stack") == 0 ? mb->mem_info->stack_size : mb->mem_info->heap_size;
     for (int i = 0; i < buf_size; i += uni_range) {
       curr_range = i + uni_range > buf_size ? buf_size - i : uni_range;
@@ -89,9 +100,8 @@ int main(int args, char* argv[])
     usleep(500000);
   }
   free_buf(mb);
-  free(ws);
   fclose(mem);
-  printf("\033[H\033[J\033[?25h");
-  fflush(stdout);
+  free(ws);
+  restore_terminal();
   return 0;
 }
