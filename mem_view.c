@@ -78,17 +78,15 @@ int main(int args, char* argv[])
   
   parse_command(args, argv, FLAG);
   mb->old_buf = parse_mem(mem, mb->mem_info, FLAG);
-  long int buf_size  = strcmp(FLAG, "stack") == 0 ?
-    mb->mem_info->stack_end - mb->mem_info->stack_start : mb->mem_info->heap_end - mb->mem_info->heap_start;
+  long int buf_size  = strcmp(FLAG, "stack") == 0 ? mb->mem_info->stack_size : mb->mem_info->heap_size;
   long int row_range = buf_size / (ws->ws_row - 2);
   long int uni_range = row_range / ws->ws_col;
   long int curr_range= uni_range;
-  draw_view(ws->ws_row, ws->ws_col);
+  draw_view(ws->ws_row, ws->ws_col); /* TODO: 是否保留？ */
   while (! stop) {
     mb->new_buf = strcmp(FLAG, "stack") == 0 ?
       parse_mem(mem, mb->mem_info, "stack") : parse_mem(mem, mb->mem_info, "heap");
-    buf_size  = strcmp(FLAG, "stack") == 0 ?
-      mb->mem_info->stack_end - mb->mem_info->stack_start : mb->mem_info->heap_end - mb->mem_info->heap_start;
+    buf_size  = strcmp(FLAG, "stack") == 0 ? mb->mem_info->stack_size : mb->mem_info->heap_size;
     for (int i = 0; i < buf_size; i += uni_range) {
       curr_range = i + uni_range > buf_size ? buf_size - i : uni_range;
       if (memcmp(mb->old_buf + i, mb->new_buf + i, curr_range) != 0) {
