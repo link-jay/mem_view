@@ -28,8 +28,10 @@ char* parse_maps(FILE* maps) {
 struct heap_stack {
   long int heap_start;
   long int heap_end;
+  long int heap_size;
   long int stack_start;
   long int stack_end;
+  long int stack_size;
 };
 
 struct heap_stack* parse_addr(char* addr)
@@ -47,20 +49,19 @@ struct heap_stack* parse_addr(char* addr)
   return result;
 }
 
-char* parse_mem(FILE* mem, struct heap_stack* addrs, const char* mode)
+char* parse_mem(FILE* mem, struct heap_stack* mem_info, const char* mode)
 {
-  long int buf_size;
   if (strcmp("heap", mode) == 0) {
-    buf_size = addrs->heap_end - addrs->heap_start;
-    char* buf = malloc(buf_size);
-    fseek(mem, addrs->heap_start, SEEK_SET);
-    fread(buf, 1, buf_size, mem);
+    mem_info->heap_size = mem_info->heap_end - mem_info->heap_start;
+    char* buf = malloc(mem_info->heap_size);
+    fseek(mem, mem_info->heap_start, SEEK_SET);
+    fread(buf, 1, mem_info->heap_size, mem);
     return buf;
   } else if (strcmp("stack", mode) == 0) {
-    buf_size = addrs->stack_end - addrs->stack_start;
-    char* buf = malloc(buf_size);
-    fseek(mem, addrs->stack_start, SEEK_SET);
-    fread(buf, 1, buf_size, mem);
+    mem_info->stack_size = mem_info->stack_end - mem_info->stack_start;
+    char* buf = malloc(mem_info->stack_size);
+    fseek(mem, mem_info->stack_start, SEEK_SET);
+    fread(buf, 1, mem_info->stack_size, mem);
     return buf;
   } else{
     printf("`%s` mode is not allow", mode);
