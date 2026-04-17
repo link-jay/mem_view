@@ -53,7 +53,7 @@ int main(int args, char* argv[])
   char* FLAG = malloc(8);
   strcpy(FLAG, "stack");
   signal(SIGINT, sigint_handler);
-  struct winsize* ws = get_tsz();
+  struct winsize* ws;
 
   char* maps_path = cat_path(args, argv, "/maps");
   FILE* maps = fopen(maps_path, "r");
@@ -80,10 +80,11 @@ int main(int args, char* argv[])
   parse_command(args, argv, FLAG);
   mb->old_buf = parse_mem(mem, mb->mem_info, FLAG);
   long int buf_size  = strcmp(FLAG, "stack") == 0 ? mb->mem_info->stack_size : mb->mem_info->heap_size;
-  long int row_range = buf_size / (ws->ws_row - 2);
-  long int uni_range = row_range / ws->ws_col;
-  long int curr_range= uni_range;
+  long int row_range, uni_range, curr_range;
   while (! stop) {
+    ws = get_tsz();
+    row_range = buf_size / (ws->ws_row - 2);
+    uni_range = row_range / ws->ws_col;
     mb->new_buf = parse_mem(mem, mb->mem_info, FLAG);
     buf_size  = strcmp(FLAG, "stack") == 0 ? mb->mem_info->stack_size : mb->mem_info->heap_size;
     for (int i = 0; i < buf_size; i += uni_range) {
@@ -96,12 +97,12 @@ int main(int args, char* argv[])
     }
     free(mb->old_buf);
     mb->old_buf = mb->new_buf;
+    free(ws);
     fflush(stdout);
     usleep(500000);
   }
   free_buf(mb);
   fclose(mem);
-  free(ws);
   restore_terminal();
   return 0;
 }
