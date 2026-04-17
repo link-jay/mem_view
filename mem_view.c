@@ -77,18 +77,16 @@ int main(int args, char* argv[])
     return 1;
   }
   
-  /* TODO: 精简解析逻辑 */
   parse_command(args, argv);
   prepare_terminal();
+  long int buf_size, row_range, uni_range, curr_range;
   mb->old_buf = parse_mem(mem, mb->mem_info, FLAG);
-  long int buf_size  = strcmp(FLAG, "stack") == 0 ? mb->mem_info->stack_size : mb->mem_info->heap_size;
-  long int row_range, uni_range, curr_range;
   while (! stop) {
     ws = get_tsz();
+    buf_size  = strcmp(FLAG, "stack") == 0 ? mb->mem_info->stack_size : mb->mem_info->heap_size;
     row_range = buf_size / (ws->ws_row - 2);
     uni_range = row_range / ws->ws_col;
     mb->new_buf = parse_mem(mem, mb->mem_info, FLAG);
-    buf_size  = strcmp(FLAG, "stack") == 0 ? mb->mem_info->stack_size : mb->mem_info->heap_size;
     for (int i = 0; i < buf_size; i += uni_range) {
       curr_range = i + uni_range > buf_size ? buf_size - i : uni_range;
       if (memcmp(mb->old_buf + i, mb->new_buf + i, curr_range) != 0) {
