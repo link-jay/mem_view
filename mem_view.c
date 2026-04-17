@@ -7,6 +7,8 @@
 #include "parse_command.c"
 
 volatile sig_atomic_t stop = 0;
+char FLAG[8];
+size_t REFRESH_TIME = 500 * 1000;
 
 struct winsize* get_tsz()
 {
@@ -21,7 +23,7 @@ struct winsize* get_tsz()
 void prepare_terminal()
 {
   printf("\033[H\033[J\033[?25l");
-  printf("mem_view refresh in 0.5s.\n");
+  printf("mem_view refresh in %.3fs.\n", REFRESH_TIME / (1000 * 1000.0));
 }
 
 void restore_terminal()
@@ -50,9 +52,9 @@ void sigint_handler(int sig)
 
 int main(int args, char* argv[])
 {
-  char* FLAG = malloc(8);
   strcpy(FLAG, "stack");
   signal(SIGINT, sigint_handler);
+  
   struct winsize* ws;
 
   char* maps_path = cat_path(args, argv, "/maps");
@@ -76,8 +78,8 @@ int main(int args, char* argv[])
   }
   
   /* TODO: 精简解析逻辑 */
+  parse_command(args, argv);
   prepare_terminal();
-  parse_command(args, argv, FLAG);
   mb->old_buf = parse_mem(mem, mb->mem_info, FLAG);
   long int buf_size  = strcmp(FLAG, "stack") == 0 ? mb->mem_info->stack_size : mb->mem_info->heap_size;
   long int row_range, uni_range, curr_range;
@@ -99,7 +101,7 @@ int main(int args, char* argv[])
     mb->old_buf = mb->new_buf;
     free(ws);
     fflush(stdout);
-    usleep(500000);
+    usleep(REFRESH_TIME);
   }
   free_buf(mb);
   fclose(mem);

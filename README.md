@@ -5,7 +5,7 @@ It's built on the Linux virtual memory system, relying on parsing /proc/[pid]/ma
 ## Features
 * [x] View heap/stack
 * [x] Refresh when size change
-* [ ] Choose refresh time
+* [x] Choose refresh time
 * [x] Switch heap/stack view via command line
 * [ ] Switch heap/stack view using hotkeys
 
