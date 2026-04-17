@@ -1,4 +1,6 @@
 digraph G {
-	"draw view" -> "parse memory" -> "draw changes"
-	"parse command" -> "draw changes"
+	"parse memory" -> "draw changes" -> "get terminal info"
+	"parse command" -> "chose stack/heap" -> "draw changes"
+	"parse command" -> "chose refresh time" -> "draw changes"
+	"get terminal info" -> "draw changes"
 }
