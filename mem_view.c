@@ -23,7 +23,6 @@ struct winsize* get_tsz()
 void prepare_terminal()
 {
   printf("\033[H\033[J\033[?25l");
-  printf("mem_view refresh in %.3fs.\n", REFRESH_TIME / (1000 * 1000.0));
 }
 
 void restore_terminal()
@@ -80,20 +79,28 @@ int main(int args, char* argv[])
   parse_command(args, argv);
   prepare_terminal();
   long int buf_size, row_range, uni_range, curr_range;
-  mb->old_buf = parse_mem(mem, mb->mem_info, FLAG);
+  mb->old_buf = NULL;
   while (! stop) {
+    printf("\033[H%s refresh in %.3fs.\n", FLAG, REFRESH_TIME / (1000 * 1000.0));
     ws = get_tsz();
     buf_size  = strcmp(FLAG, "stack") == 0 ? mb->mem_info->stack_size : mb->mem_info->heap_size;
     row_range = buf_size / (ws->ws_row - 2);
     uni_range = row_range / ws->ws_col;
     mb->new_buf = parse_mem(mem, mb->mem_info, FLAG);
-    for (int i = 0; i < buf_size; i += uni_range) {
-      curr_range = i + uni_range > buf_size ? buf_size - i : uni_range;
-      if (memcmp(mb->old_buf + i, mb->new_buf + i, curr_range) != 0) {
-	printf("\033[%d;%dH\033[31mX", (i / row_range) + 2, (i % row_range) / uni_range + 1);
-      } else {
-	printf("\033[%d;%dH\033[37m|", (i / row_range) + 2, (i % row_range) / uni_range + 1);
+    if (mb->old_buf != NULL) {
+      for (int i = 0; i < buf_size; i += uni_range) {
+	curr_range = i + uni_range > buf_size ? buf_size - i : uni_range;
+	if (memcmp(mb->old_buf + i, mb->new_buf + i, curr_range) != 0) {
+	  printf("\033[%d;%dH\033[31mX", (i / row_range) + 2, (i % row_range) / uni_range + 1);
+	} else {
+	  printf("\033[%d;%dH\033[37m|", (i / row_range) + 2, (i % row_range) / uni_range + 1);
+	}
       }
+    } else {
+      printf("\033[H\033[Jwaiting...\n");
+      for (int i = 0; i < buf_size; i += uni_range) {
+	printf("\033[%d;%dH\033[37m|", (i / row_range) + 2, (i % row_range) / uni_range + 1);
+      }     
     }
     free(mb->old_buf);
     mb->old_buf = mb->new_buf;
