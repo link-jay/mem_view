@@ -7,7 +7,7 @@ It's built on the Linux virtual memory system, relying on parsing /proc/[pid]/ma
 * [x] Refresh when size change
 * [x] Choose refresh time
 * [x] Switch heap/stack view via command line
-* [ ] Switch heap/stack view using hotkeys
+* [x] Switch heap/stack view using hotkeys
 
 ## Args
 `./mem_view.out [-s|-h|-t 200|--help] target`  
