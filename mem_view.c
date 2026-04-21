@@ -5,6 +5,7 @@
 #include <signal.h>
 #include "readmem.c"
 #include "parse_command.c"
+#include "term_key.c"
 
 volatile sig_atomic_t stop = 0;
 char FLAG[8];
@@ -18,17 +19,6 @@ struct winsize* get_tsz()
     exit(1);
   }
   return ws;
-}
-
-void prepare_terminal()
-{
-  printf("\033[H\033[J\033[?25l");
-}
-
-void restore_terminal()
-{
-  printf("\033[H\033[J\033[?25h");
-  fflush(stdout);
 }
 
 struct mem_buf {
@@ -77,8 +67,9 @@ int main(int args, char* argv[])
   }
   
   parse_command(args, argv);
-  prepare_terminal();
+  prepare_terminal(); term_init();
   long int buf_size, row_range, uni_range, curr_range;
+  int key;
   mb->old_buf = NULL;
   while (! stop) {
     printf("\033[H%s refresh in %.3fs.\n", FLAG, REFRESH_TIME / (1000 * 1000.0));
@@ -97,19 +88,23 @@ int main(int args, char* argv[])
 	}
       }
     } else {
-      printf("\033[H\033[Jwaiting...\n");
-      for (int i = 0; i < buf_size; i += uni_range) {
-	printf("\033[%d;%dH\033[37m|", (i / row_range) + 2, (i % row_range) / uni_range + 1);
-      }     
+      puts("\033[H\033[Jwaiting...");
     }
+    usleep(REFRESH_TIME);
     free(mb->old_buf);
-    mb->old_buf = mb->new_buf;
+    key = term_getkey();
+    if (key != -1) {
+      if (key == 's') {strcpy(FLAG, "stack"); mb->old_buf = NULL; free(mb->new_buf);}
+      else if (key == 'h') {strcpy(FLAG, "heap"); mb->old_buf = NULL; free(mb->new_buf);}
+      else if (key == 'q') {stop = 1;}
+    } else {
+      mb->old_buf = mb->new_buf;
+    }
     free(ws);
     fflush(stdout);
-    usleep(REFRESH_TIME);
   }
   free_buf(mb);
   fclose(mem);
-  restore_terminal();
+  restore_terminal(); term_restore();
   return 0;
 }
