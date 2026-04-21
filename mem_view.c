@@ -73,11 +73,13 @@ int main(int args, char* argv[])
   mb->old_buf = NULL;
   while (! stop) {
     printf("\033[H%s refresh in %.3fs.\n", FLAG, REFRESH_TIME / (1000 * 1000.0));
+    /* section deal change terminal size */
     ws = get_tsz();
     buf_size  = strcmp(FLAG, "stack") == 0 ? mb->mem_info->stack_size : mb->mem_info->heap_size;
     row_range = buf_size / (ws->ws_row - 2);
     uni_range = row_range / ws->ws_col;
     mb->new_buf = parse_mem(mem, mb->mem_info, FLAG);
+    /* section draw view */
     if (mb->old_buf != NULL) {
       for (int i = 0; i < buf_size; i += uni_range) {
 	curr_range = i + uni_range > buf_size ? buf_size - i : uni_range;
@@ -90,8 +92,10 @@ int main(int args, char* argv[])
     } else {
       puts("\033[H\033[Jwaiting...");
     }
+    fflush(stdout);
     usleep(REFRESH_TIME);
     free(mb->old_buf);
+    /* section hotkey */
     key = term_getkey();
     if (key != -1) {
       if (key == 's') {strcpy(FLAG, "stack"); mb->old_buf = NULL; free(mb->new_buf);}
@@ -101,7 +105,6 @@ int main(int args, char* argv[])
       mb->old_buf = mb->new_buf;
     }
     free(ws);
-    fflush(stdout);
   }
   free_buf(mb);
   fclose(mem);
