@@ -43,5 +43,4 @@ void prepare_terminal()
 void restore_terminal()
 {
   printf("\033[H\033[J\033[?25h");
-  fflush(stdout);
 }
