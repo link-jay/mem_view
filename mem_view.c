@@ -41,6 +41,8 @@ void sigint_handler(int sig)
 
 int main(int args, char* argv[])
 {
+  parse_command(args, argv);
+  
   strcpy(FLAG, "stack");
   signal(SIGINT, sigint_handler);
   
@@ -66,7 +68,6 @@ int main(int args, char* argv[])
     return 1;
   }
   
-  parse_command(args, argv);
   prepare_terminal();
   term_init();
   long int buf_size, row_range, uni_range, curr_range;
