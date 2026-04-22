@@ -1,6 +1,17 @@
 digraph G {
-	"parse memory" -> "draw changes" -> "get terminal info"
-	"parse command" -> "chose stack/heap" -> "draw changes"
-	"parse command" -> "chose refresh time" -> "draw changes"
-	"get terminal info" -> "draw changes"
+	compound = true;
+
+	"parse command" -> "chose stack/heap out"
+	"parse command" -> "chose refresh time"
+
+	"chose stack/heap out" -> "draw changes" [lhead=cluster_group]
+	"chose refresh time" -> "draw changes" [lhead=cluster_group]
+
+	subgraph cluster_group {
+		"parse memory" -> "get terminal info" -> "draw changes"
+		"draw changes" -> "get hotkey" -> "chose stack/heap in" -> "parse memory"
+	}
+
+	"chose stack/heap out" [label="chose stack/heap"]
+	"chose stack/heap in" [label="chose stack/heap"]
 }
