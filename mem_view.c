@@ -34,7 +34,7 @@ void free_buf(struct mem_buf* buf)
   free(buf);
 }
   
-void sigint_handler(int sig)
+void sigint_handler(int)
 {
   stop = 1;
 }
@@ -81,14 +81,14 @@ int main(int args, char* argv[])
     uni_range = row_range / ws->ws_col;
     mb->new_buf = parse_mem(mem, mb->mem_info, FLAG);
     /* section draw view */
-    printf("\033[H%s refresh in %.3fs. Each unit for %dB.\n", FLAG, REFRESH_TIME / (1000 * 1000.0), uni_range);
+    printf("\033[H%s refresh in %.3fs. Each unit for %ldB.\n", FLAG, REFRESH_TIME / (1000 * 1000.0), uni_range);
     if (mb->old_buf != NULL) {
       for (int i = 0; i < buf_size; i += uni_range) {
 	curr_range = i + uni_range > buf_size ? buf_size - i : uni_range;
 	if (memcmp(mb->old_buf + i, mb->new_buf + i, curr_range) != 0) {
-	  printf("\033[%d;%dH\033[31mX", (i / row_range) + 2, (i % row_range) / uni_range + 1);
+	  printf("\033[%ld;%ldH\033[31mX", (i / row_range) + 2, (i % row_range) / uni_range + 1);
 	} else {
-	  printf("\033[%d;%dH\033[37m|", (i / row_range) + 2, (i % row_range) / uni_range + 1);
+	  printf("\033[%ld;%ldH\033[37m|", (i / row_range) + 2, (i % row_range) / uni_range + 1);
 	}
       }
     } else {
