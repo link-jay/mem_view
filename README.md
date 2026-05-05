@@ -1,6 +1,8 @@
 # mem_view
 A simple memory view program in C.  
-It's built on the Linux virtual memory system, relying on parsing /proc/[pid]/maps and reading /proc/[pid]/mem to achieve its functionality.
+It's built on the Linux virtual memory system, relying on parsing /proc/[pid]/maps and reading /proc/[pid]/mem to achieve its functionality.  
+
+![demo](assets/demo.gif)
 
 ## Features
 * [x] View heap/stack
@@ -22,4 +24,4 @@ While running:
 - Type `q` or press Ctrl-C to quit.  
 
 ## Arch
-![Arch](./arch.svg)
+![Arch](arch.svg)
